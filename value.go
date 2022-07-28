@@ -49,19 +49,24 @@ func setValue(output reflect.Value, input interface{}) (set bool, err error) {
 	case typ == timeType:
 		val, err = cast.ToTimeE(input)
 	case typ == stringSliceType:
-		var sval string
-		sval, err = cast.ToStringE(input)
-		if err != nil {
-			return false, err
-		}
-		sval = trimByteFront(sval, '[')
-		sval = trimByteFront(sval, '"')
-		sval = trimByteBack(sval, ']')
-		sval = trimByteBack(sval, '"')
-		if len(sval) > 0 {
-			val, err = csv.NewReader(strings.NewReader(sval)).Read()
-		} else {
-			val = []string(nil)
+		switch i := input.(type) {
+		case []string:
+			val = i
+		default:
+			var sval string
+			sval, err = cast.ToStringE(input)
+			if err != nil {
+				return false, err
+			}
+			sval = trimByteFront(sval, '[')
+			sval = trimByteFront(sval, '"')
+			sval = trimByteBack(sval, ']')
+			sval = trimByteBack(sval, '"')
+			if len(sval) > 0 {
+				val, err = csv.NewReader(strings.NewReader(sval)).Read()
+			} else {
+				val = []string(nil)
+			}
 		}
 
 	// if it can be set by string, do that

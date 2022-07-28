@@ -27,6 +27,7 @@ func TestDecode(t *testing.T) {
 		input := d{
 			"x": d{
 				"y": l{2},
+				"z": []string{"2", "3"},
 			},
 			"x.y.0": 3, // should always take precedence
 
@@ -43,6 +44,7 @@ func TestDecode(t *testing.T) {
 		type into struct {
 			X struct {
 				Y []int
+				Z []string
 			}
 			Z []map[string]interface{}
 			F int
@@ -51,11 +53,14 @@ func TestDecode(t *testing.T) {
 
 		res := Decode(input, &output)
 		assert.Error(t, res.Error)
-		assert.DeepEqual(t, res.Used, s("x.y.0", "x.y.0", "z.0.q", "z.1.q", "z.2.q"))
+		assert.DeepEqual(t, res.Used, s("x.y.0", "x.y.0", "z.0.q", "z.1.q", "z.2.q", "x.z.0", "x.z.1"))
 		assert.DeepEqual(t, res.Missing, s("q.f"))
 		assert.DeepEqual(t, res.Broken, s("f"))
 		assert.DeepEqual(t, output, into{
-			X: struct{ Y []int }{Y: []int{3}},
+			X: struct {
+				Y []int
+				Z []string
+			}{Y: []int{3}, Z: []string{"2", "3"}},
 			Z: []map[string]interface{}{{"q": 0}, {"q": 1}, {"q": 2}},
 		})
 	})

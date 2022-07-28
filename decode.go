@@ -111,6 +111,13 @@ func (d *decodeState) decode(input interface{}, output reflect.Value, base strin
 		}
 		return any
 
+	case []string:
+		any := false
+		for key, value := range input {
+			any = d.decodeKeyValue(strconv.Itoa(key), value, output, base) || any
+		}
+		return any
+
 	default:
 		set, err := setValue(output, input)
 		if !set || err != nil {
